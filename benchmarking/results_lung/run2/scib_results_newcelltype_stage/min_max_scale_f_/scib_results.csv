@@ -1,0 +1,14 @@
+,X_FinVAE_30_0_nocg_nocc,Metric Type
+Isolated labels,0.48164314,Bio conservation
+KMeans NMI,0.6495887762994578,Bio conservation
+KMeans ARI,0.07144312873555039,Bio conservation
+Silhouette label,0.4668987803161144,Bio conservation
+cLISI,0.9983348008160178,Bio conservation
+Silhouette batch,0.8794826,Batch correction
+iLISI,0.08821894905783913,Batch correction
+KBET,0.6619080633477954,Batch correction
+Graph connectivity,0.7000985794217712,Batch correction
+PCR comparison,0.21003287595162431,Batch correction
+Batch correction,0.5079482189388016,Aggregate score
+Bio conservation,0.53358172529663,Aggregate score
+Total,0.5233283227534986,Aggregate score
