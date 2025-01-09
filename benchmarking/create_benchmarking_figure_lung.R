@@ -5,24 +5,21 @@ library(plyr)
 library(ggplot2)
 library(dplyr)
 
-res_name = strsplit(res,'_')[[1]]
-res_name = paste(res_name[3:length(res_name)],collapse = '_')
-
 ## first run with most methods
-res0 = read.csv(paste0('results_lung/run1/scib_results_newcelltype_stage/min_max_scale_f_/scib_results.csv'), check.names = FALSE, row.names = 1)
+res0 = read.csv(paste0('results_lung/scib_results_newcelltype_stage_run1/min_max_scale_f_/scib_results.csv'), check.names = FALSE, row.names = 1)
 res0 = t(res0)
 metrics = res0['Metric Type',]
 res0 = res0[1:(nrow(res0)-1),]
 
-res1 = read.csv(paste0('results_lung/run2/scib_results_newcelltype_stage/min_max_scale_f_/scib_results.csv'), check.names = FALSE, row.names = 1)
+res1 = read.csv(paste0('results_lung/scib_results_newcelltype_stage_run2/min_max_scale_f_/scib_results.csv'), check.names = FALSE, row.names = 1)
 res1 = t(res1)
 res1 = res1[1:(nrow(res1)-1),]
 
-res0 = rbind(res0, res1)
-rownames(res0)[rownames(res0) == 'res1'] = 'X_FinVAE'
+res = rbind(res0, res1)
+rownames(res)[rownames(res) == 'res1'] = 'X_FinVAE'
 
 # add metrics row to new df (recalculate scores after removing pcr)
-res0 = rbind(res0, metrics)
+res0 = rbind(res, metrics)
 rownames(res0)[rownames(res0) == 'metrics'] = 'Metric Type'
 
 for (i in 1:(nrow(res0)-1)){
@@ -88,7 +85,7 @@ ggplot(metrics2, aes(x = Method, y = Score, fill = Testing)) +
     panel.spacing = unit(1, "lines")
   )
 
-ggsave(paste0('invae_lung_plot_',res_name,'_oct24.pdf'), width = 5, height = 10)
+ggsave(paste0('invae_lung_plot_oct24.pdf'), width = 5, height = 10)
 
-write.csv(res, paste0('scib_scores_lung_',res_name,'.csv'))
-write.csv(res0, paste0('scib_scores_lung_',res_name,'_summary.csv'))
+write.csv(res, paste0('scib_scores_lung.csv'))
+write.csv(res0, paste0('scib_scores_lung_summary.csv'))

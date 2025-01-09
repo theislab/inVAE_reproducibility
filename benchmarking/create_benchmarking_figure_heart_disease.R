@@ -5,23 +5,27 @@ library(plyr)
 library(ggplot2)
 library(dplyr)
 
-
-## first run with most methods
-res1 = read.csv('results_heart/scib_results_disease_oct24/min_max_scale_f_/scib_results.csv', check.names = FALSE, row.names = 1)
+res1 = read.csv('/lustre/scratch127/cellgen/cellgeni/tickets/tic-3135/results_heart/scib_results_disease_aug24/min_max_scale_f_/scib_results.csv', check.names = FALSE, row.names = 1)
+res1 = res1[, !colnames(res1) %in% c('X_fastmnn', 'X_scVI', 'X_scanorama', 'X_combat_pca', 'X_harmony')] # remove fastmnn, scvi and scanorama
 ## second run with recently tested methods
-res2 = read.csv('results_heart/scib_results_disease_aug24/min_max_scale_f_/scib_results.csv', check.names = FALSE, row.names = 1)
-res2 = res2[, colnames(res2) == 'X_FinVAE'] # get invae only
+res2 = read.csv('/lustre/scratch127/cellgen/cellgeni/tickets/tic-3135/results_heart/scib_results_disease_sep24/min_max_scale_f_/scib_results.csv', check.names = FALSE, row.names = 1)
+res2 = res2[, !colnames(res2) %in% c('X_scVI', 'X_pca', 'X_scmerge_pca')] # leave scdisinfect only
+# third run with previously problematic methods
+res3 = read.csv('/lustre/scratch127/cellgen/cellgeni/tickets/tic-3135/results_heart/scib_results_disease_oct24/min_max_scale_f_/scib_results.csv', check.names = FALSE, row.names = 1)
 
+# when checked, it was seen that only kbet is different with very minimal difference (0.002)
 
 res1 = t(res1)
 metrics = res1['Metric Type',]
 res1 = res1[1:(nrow(res1)-1),]
 res2 = t(res2)
 res2 = res2[1:(nrow(res2)-1),]
+res3 = t(res3)
+res3 = res3[1:(nrow(res3)-1),]
 
 # concat both dataframes
-res = rbind(res1, res2)
-rownames(res)[rownames(res) == 'res2'] = 'X_FinVAE'
+res = rbind(res1, res2, res3)
+rownames(res)[rownames(res) == 'res2'] = 'X_disinfact'
 
 # add metrics row to new df (recalculate scores after removing pcr)
 res0 = rbind(res, metrics)
@@ -39,7 +43,7 @@ res0 <- mutate_all(res0, function(x) as.numeric(as.character(x)))
 res0 <- tibble::rownames_to_column(res0, "Method")
 
 res0$Method <- plyr::mapvalues(res0$Method, 
-                                from = c("X_harmony", "X_scVI", "X_scanorama2", "X_FinVAE", "X_scpoli", "X_combat_pca", "X_fastmnn", "X_disinfact", "X_scmerge2_pca", "X_pca"), 
+                                from = c("X_harmony", "X_scVI", "X_scanorama", "X_FinVAE", "X_scpoli", "X_combat_pca", "X_fastmnn", "X_disinfact", "X_scmerge2_pca", "X_pca"), 
                                 to = c("Harmony", "scVI", "Scanorama", "inVAE", "scPoli", "Combat (PCA)", "fastMNN", "scDisInFact", "scMerge (PCA)", "PCA"))
 
 res0 <- res0[,c("Method", "Batch correction", "Bio conservation", "Total")]
@@ -81,7 +85,7 @@ metrics2 <- metrics %>%
 metrics2$Testing <- str_replace_all(metrics2$Testing, " ", "\n")
 
 
-# Then, use this modified data frame in ggplot code
+# Then, use this modified data frame in your ggplot code
 ggplot(metrics2, aes(x = Method, y = Score, fill = Testing)) + 
   geom_tile(aes(y = 0.5, height = Inf, fill = row_color), alpha = 0.2) +
   geom_col(position = position_dodge(width = 0.9)) +
@@ -113,27 +117,3 @@ write.csv(res0, 'scib_scores_heart_disease_summary.csv')
 
 
 metrics
-
-# # Defining column_info, row_info and palettes
-# row_info <- data.frame(id = res0$Method)
-
-# column_info <- data.frame(id = colnames(res0),
-#                           group = c("Text", "Batch correction", "Bioconservation", "Overall score"),
-#                           geom = c("text", "bar", "bar", "bar"),
-#                           width = c(8,3,3,3),
-#                           overlay = F)
-
-
-# # defining colors palette
-# palettes <- list("Overall score" = "YlOrRd",
-#                  "Batch correction" = "BuPu",
-#                  "Bioconservation" = "RdPu")
-
-
-# g <- scIB_knit_table(data = res0, column_info = column_info, row_info = row_info, palettes = palettes, usability = F)  
-# now <- Sys.time()
-# ggsave(paste0(outdir, "/", format(now, "%Y%m%d_%H%M%S_"), dt.sc, "_summary_metrics_best_preprocessing_only.pdf"), g, device = cairo_pdf, width = 297, height = 420, units = "mm")
-# ggsave(paste0(outdir, "/", format(now, "%Y%m%d_%H%M%S_"), dt.sc, "_summary_metrics_best_preprocessing_only.tiff"), g, device = "tiff", dpi = "retina", width = 297, height = 420, units = "mm")
-# ggsave(paste0(outdir, "/", format(now, "%Y%m%d_%H%M%S_"), dt.sc, "_summary_metrics_best_preprocessing_only.png"), g, device = "png", dpi = "retina", width = 297, height = 420, units = "mm")
-
-}
